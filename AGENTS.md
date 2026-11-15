@@ -23,4 +23,4 @@ Mise installs the toolchain and runs the tasks.
 - `amphi-web` fetches its dependencies with a fixed-output hash over `pnpm-lock.yaml`. After changing the lockfile, run `mise run nix:hash:update`, then `mise run nix:hash:check`. Register every new fixed-output hash in `nix/hash-targets.toml`.
 - The package pins pnpm with `pnpm_<major>`, matching the pnpm major version in `mise.toml`: pnpm's store format, and with it the hash, changes between major versions. Bump both together, then update the hash.
 - The NixOS module takes its packages from `pkgs.amphi` and `pkgs.amphi-web`, which `overlays.default` adds. Consumers apply the overlay on their own nixpkgs.
-- CI pins the niks3 actions to commits, since a niks3 client must not be newer than the niks3 server.
+- CI pins the niks3 actions to exact versions, since a niks3 client must not be newer than the niks3 server.
