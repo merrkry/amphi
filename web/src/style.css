@@ -1,0 +1,82 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 1.5rem auto;
+  max-width: 80rem;
+  padding: 0 1rem;
+  color: #1f2328;
+}
+
+nav a {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.25rem 0.75rem 0.25rem 0;
+  border-bottom: 1px solid #d1d9e0;
+}
+
+table.facts th {
+  width: 10rem;
+}
+
+code,
+pre {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+
+pre {
+  background: #f6f8fa;
+  padding: 0.75rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.muted,
+.state.queued,
+.state.superseded {
+  color: #59636e;
+}
+
+.state.succeeded,
+.state.cached {
+  color: #1a7f37;
+}
+
+.state.failed,
+.state.dep_failed,
+.state.eval_error,
+.error {
+  color: #cf222e;
+}
+
+.state.running,
+.state.uploading,
+.state.building,
+.state.evaluating {
+  color: #9a6700;
+}
+
+time[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+table.times {
+  width: auto;
+}
+
+table.times td,
+table.times th + th {
+  width: 6rem;
+}

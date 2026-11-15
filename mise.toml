@@ -1,0 +1,54 @@
+[settings]
+# NixOS hosts use nix-ld to run precompiled tools.
+all_compile = false
+
+[tools]
+node = "24.22.2"
+pnpm = "12.18.0"
+rust = { version = "1.99.1", components = ["rustfmt", "clippy"] }
+vp = "1.5.0"
+
+[env]
+NODE_OPTIONS = '{% if os() == "linux" %}--use-openssl-ca{% else %}{{ env.NODE_OPTIONS | default(value="") }}{% endif %}'
+
+[tasks.init]
+description = "Install locked JavaScript dependencies"
+run = "pnpm install --frozen-lockfile"
+
+[tasks.check]
+description = "Run static checks and the unit tests"
+depends = ["init"]
+run = [
+  "cargo fmt --check",
+  "cargo clippy --all-targets -- -D warnings",
+  "cargo test",
+  "pnpm exec vp fmt --check",
+  "pnpm run check",
+]
+
+[tasks.format]
+description = "Format all source files"
+depends = ["init"]
+run = ["cargo fmt", "pnpm exec vp fmt", "nix fmt -- flake.nix nix"]
+
+[tasks."check:nix"]
+description = "Check Nix formatting and evaluate the flake"
+run = ["nix fmt -- --check flake.nix nix", "nix flake check --all-systems --no-build"]
+
+[tasks.test]
+description = "Run every test, including those on a temporary Postgres server"
+run = "nix shell --inputs-from . nixpkgs#postgresql --command scripts/with-postgres.sh cargo test -- --include-ignored"
+
+[tasks."test:vm"]
+description = "Run the VM test of a deployment, which takes a few minutes"
+run = "nix build --no-link .#checks.x86_64-linux.vm"
+
+[tasks."nix:hash:check"]
+description = "Rebuild fixed-output dependencies to verify their hashes"
+raw_args = true
+run = "nix run github:merrkry/nur-packages#nix-hash -- check"
+
+[tasks."nix:hash:update"]
+description = "Recalculate fixed-output dependency hashes, e.g. after changing pnpm-lock.yaml"
+raw_args = true
+run = "nix run github:merrkry/nur-packages#nix-hash -- update"

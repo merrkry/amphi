@@ -1,0 +1,13 @@
+{
+  "name": "amphi",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "vp check"
+  },
+  "devDependencies": {
+    "@tsconfig/strictest": "^2.0.8",
+    "@types/node": "^24.19.1",
+    "vite-plus": "catalog:"
+  }
+}

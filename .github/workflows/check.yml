@@ -1,0 +1,80 @@
+name: Check
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  mise-managed-checks:
+    name: Mise-managed checks
+    runs-on: ubuntu-latest
+    env:
+      # mise's cache must include rustup's toolchain, not just its install record.
+      MISE_RUSTUP_HOME: /home/runner/.local/share/mise/rustup
+      MISE_CARGO_HOME: /home/runner/.local/share/mise/cargo
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install toolchain with mise
+        uses: jdx/mise-action@v5
+
+      - name: Cache pnpm downloads
+        uses: actions/setup-node@v7
+        with:
+          # Node and pnpm are already installed and versioned by mise.
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run Mise-managed checks
+        run: mise run check
+
+  nix:
+    name: Nix
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      # Nix detects the kvm system feature when it starts, so open /dev/kvm first.
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Nix
+        uses: NixOS/nix-installer-action@v1
+
+      # niks3 clients must not be newer than the server, so the actions that
+      # bring one are pinned to a commit.
+      - name: Use niks3 as a substituter
+        uses: Mic92/niks3-action@01820a2b97ac01531ad9fb859db94af63ffcbd83 # v1.10.0
+        with:
+          server-url: https://niks3-api.tsubasa.moe
+          skip-push: true
+
+      - name: Check formatting and evaluate the flake
+        run: |
+          nix fmt -- --check flake.nix nix
+          nix flake check --all-systems --no-build
+
+      - name: Build and cache checks, including the VM test
+        uses: merrkry/niks3-build-action@0a9ea9faad7933de3d7237b940a9421bff541abb # v0.1.0
+        with:
+          server-url: https://niks3-api.tsubasa.moe
+          flake: .#checks.x86_64-linux

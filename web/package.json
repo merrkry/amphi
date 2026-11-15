@@ -1,0 +1,15 @@
+{
+  "name": "amphi-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vp build",
+    "dev": "vp dev"
+  },
+  "dependencies": {
+    "preact": "^11.0.1"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  }
+}

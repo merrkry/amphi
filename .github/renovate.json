@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["mise", "npm", "cargo", "github-actions"],
+  "schedule": ["* * * * 5"],
+  "minimumReleaseAge": "7 days",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["* * * * 5"]
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["mise"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "toolchain"
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "JavaScript dependencies"
+    },
+    {
+      "matchManagers": ["cargo"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "Rust dependencies"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "groupName": null
+    },
+    {
+      "description": "niks3 clients must not be newer than the niks3 server; update them after the server.",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["Mic92/niks3-action", "merrkry/niks3-build-action"],
+      "groupName": "niks3 clients"
+    },
+    {
+      "description": "Vite+ requires its core alias at the same version, including across majors.",
+      "matchPackageNames": ["vite-plus", "@voidzero-dev/vite-plus-core"],
+      "groupName": "Vite+"
+    }
+  ]
+}
